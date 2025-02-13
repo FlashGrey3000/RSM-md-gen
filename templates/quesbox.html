@@ -32,9 +32,7 @@
             let previousBlock = currentBlock.previousElementSibling;
 
             if (previousBlock && previousBlock.classList.contains("question-container")) {
-                // Merge text
                 previousBlock.querySelector(".question-text").innerHTML += "<br><br>" + currentBlock.querySelector(".question-text").innerHTML;
-                // Remove current block
                 currentBlock.remove();
             }
         }
@@ -42,6 +40,41 @@
         function removeBlock(button) {
             let block = button.parentElement;
             block.remove();
+        }
+
+        async function fetchData() {
+            const questionElements = document.querySelectorAll(".question-text");
+
+            const questionList = Array.from(questionElements).map(q => q.innerText);
+
+            const response = await fetch("/generate/", {  
+                method: "POST",  
+                headers: { "Content-Type": "application/json" },  
+                body: JSON.stringify({ questions: questionList })
+            });
+
+            const data = await response.json();
+            document.getElementById("output").innerText = data.response || "Error generating response.";
+        }
+
+        function copyToClipboard(button) {
+            let codeElement = button.previousElementSibling;
+            navigator.clipboard.writeText(codeElement.textContent).then(() => {
+                alert("Copied to clipboard!")
+            });
+        }
+    
+        async function sendToGenerate(button) {
+            let questionText = button.parentElement.querySelector(".question-text").innerText;
+
+            const response = await fetch("/generate/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: questionText })
+            });
+
+            const result = await response.json();
+            alert(result.response || "Error generating response.");
         }
     </script>
 </head>
@@ -58,6 +91,12 @@
         </div>
         {% endfor %}
     </div>
+
+    <button onclick="fetchData()">Generate Markdown</button>
+
+    <pre><code id="output"></code></pre>
+
+    <button onclick="copyToClipboard(this)">Copy Code</button>
 
 </body>
 </html>
