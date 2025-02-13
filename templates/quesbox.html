@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Question Merger</title>
+    <style>
+        .question-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .merge-btn, .remove-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            color: white;
+        }
+        .merge-btn { background-color: #007bff; }
+        .merge-btn:hover { background-color: #0056b3; }
+        .remove-btn { background-color: #dc3545; top: 40px; }
+        .remove-btn:hover { background-color: #a71d2a; }
+    </style>
+    <script>
+        function mergeWithPrevious(button) {
+            let currentBlock = button.parentElement;
+            let previousBlock = currentBlock.previousElementSibling;
+
+            if (previousBlock && previousBlock.classList.contains("question-container")) {
+                // Merge text
+                previousBlock.querySelector(".question-text").innerHTML += "<br><br>" + currentBlock.querySelector(".question-text").innerHTML;
+                // Remove current block
+                currentBlock.remove();
+            }
+        }
+
+        function removeBlock(button) {
+            let block = button.parentElement;
+            block.remove();
+        }
+    </script>
+</head>
+<body>
+
+    <h2>Question Blocks</h2>
+
+    <div id="questions-container">
+        {% for question in questions %}
+        <div class="question-container">
+            <p class="question-text">{{ question }}</p>
+            <button class="merge-btn" onclick="mergeWithPrevious(this)">Merge with Previous</button>
+            <button class="remove-btn" onclick="removeBlock(this)">Remove</button>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

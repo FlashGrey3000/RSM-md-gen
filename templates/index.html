@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <script>
+        async function fetchData() {
+            const response = await fetch("/generate");
+            const data = await response.json();
+            document.getElementById("output").innerText = data.response;
+        }
+    </script>
+</head>
+<body>
+    <h1>Groq Markdown Generator</h1>
+    <button onclick="fetchData()">Generate Markdown</button>
+    <p id="output"></p>
+</body>
+</html>
