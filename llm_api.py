@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),  # Add your own API KEY for development purposes.
+    api_key=os.environ.get("GROQ_API_KEY"),  # Add your own API KEY during development.
 )
 
 default_system_prompt = """You are an assistant specialized in developing algorithmic solutions in Python. When given a programming question, you will analyze it and provide a comprehensive solution following a structured approach in markdown format.
@@ -189,6 +189,6 @@ def generate_message(request):
                 "content": request,
             }
         ],
-        model="deepseek-r1-distill-llama-70b",
+        model="llama-3.3-70b-versatile", # deepseek-r1-distill-llama-70b also works really well (but exhausts tokens real quick because of <think> tag)
     )
     return chat_completion.choices[0].message.content
