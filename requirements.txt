@@ -3,4 +3,4 @@ uvicorn
 groq
 pymupdf
 jinja2
-dotenv
+python-dotenv
