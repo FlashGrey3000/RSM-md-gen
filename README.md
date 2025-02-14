@@ -5,13 +5,13 @@ This repo is *under development*. Open Source contributions are welcome *(and ap
 Made particularly for the course *UCS2403 - Design and Analysis of Algorithms.* Cause creating the entire documentation for each question is 😭  
 
 ## TODO
-- Add the `unittest` section
-- Add CSS styling to HTML documentation
-- Fix the copy-to-clipboard button
-- Enhance PDF parsing and improve text extraction accuracy
-- Improve error handling and logging
-- Add support for more Markdown flavors (maybe a shakespearean theme because sir likes it a lot ig)
-- Disable and add a loading button after <kbd>generate markdown</kbd> is clicked
+- [ ] Add the `unittest` section
+- [ ] Add CSS styling to HTML documentation
+- [ ] Fix the copy-to-clipboard button
+- [ ] Enhance PDF parsing and improve text extraction accuracy
+- [ ] Improve error handling and logging
+- [ ] Add support for more Markdown flavors (maybe a shakespearean theme because sir likes it a lot ig)
+- [ ] Disable and add a loading button after <kbd>generate markdown</kbd> is clicked
 
 ## Important Info
 - The site is running on [`render`](https://render.com/), and due its free deployment limitations the **server takes around 1 minute to load up the first time after long inactivity.** Please be patient.
