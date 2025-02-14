@@ -5,9 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),  # Add your own API KEY during development.
+    api_key=os.environ.get("GROQ_API_KEY"),  # Add your own API KEY during development. (recommended: create a .env file and add your groq api key here https://console.groq.com/keys)
 )
 
+
+
+# A few extra system prompts that I have generated, if you feel these can be enhanced please open a pull request. (claude generates good prompts)
 default_system_prompt = """You are an assistant specialized in developing algorithmic solutions in Python. When given a programming question, you will analyze it and provide a comprehensive solution following a structured approach in markdown format.
 
 # Problem Description
@@ -161,19 +164,21 @@ Rules for Both Sections:
 5. Document recursive relationships clearly
 6. Use logical conditions for input validation"""
 
-chat_completion = client.chat.completions.create(
-    messages=[
-        {
-            "role": "system",
-            "content": default_system_prompt,
-        },
-        {
-            "role": "user",
-            "content": "Hello, wanna chat about something?",
-        }
-    ],
-    model="deepseek-r1-distill-llama-70b",
-)
+# chat_completion = client.chat.completions.create(
+#     messages=[
+#         {
+#             "role": "system",
+#             "content": default_system_prompt,
+#         },
+#         {
+#             "role": "user",
+#             "content": "Hello, wanna chat about something?",
+#         }
+#     ],
+#     model="deepseek-r1-distill-llama-70b",
+# ) 
+
+# letting the above code block stay for reference 
 
 
 
