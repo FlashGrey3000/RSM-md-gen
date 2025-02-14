@@ -19,7 +19,7 @@ def extract_questions_from_pdf(pdf_data):
     
     return questions
 
-if __name__ == "main":
+if __name__ == "main":  # just for testing purposes
     pdf_questions = extract_questions_from_pdf("example_maxarr.pdf")
 
     for i, q in enumerate(pdf_questions, start=1):

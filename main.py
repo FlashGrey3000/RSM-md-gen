@@ -11,7 +11,7 @@ questions = []  # storing questions globally
 
 @app.get("/")
 async def homepage(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "title": "Groq Markdown Generator"})
+    return templates.TemplateResponse("index.html", {"request": request, "title": "RSM-style Markdown Generator"})
 
 @app.get("/quesbox")
 async def quesbox(request: Request):
