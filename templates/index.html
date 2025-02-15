@@ -3,23 +3,71 @@
 <head>
     <title>{{ title }}</title>
     <script>
-            function copyToClipboard(button) {
-
-                let codeElement = button.previousElementSibling;
-
-                navigator.clipboard.writeText(codeElement.textContent).then(() => {
-                    alert("Copied to clipboard!")
-                });
+        function toggleInputMethod() {
+            const inputMethod = document.querySelector('input[name="input_method"]:checked').value;
+            const form = document.getElementById("mainForm");
+            const uploadSection = document.getElementById("uploadSection");
+            const pdfInput = document.getElementById("pdfInput");
+    
+            if (inputMethod === "manual") {
+                form.action = "/quesbox/";
+                form.method = "GET";
+                form.removeAttribute("enctype");
+                uploadSection.style.display = "none";
+                pdfInput.removeAttribute("required");
+            } else {
+                form.action = "/upload/";
+                form.method = "POST";
+                form.setAttribute("enctype", "multipart/form-data");
+                uploadSection.style.display = "block";
+                pdfInput.setAttribute("required", "true");
             }
+        }
     </script>
 </head>
 <body>
     <h1>RSM-style Markdown Generator</h1>
 
-    <form id="upload-form" action="/upload/" method="post" enctype="multipart/form-data">
-        <input type="file" id="file-input" name="file" accept="application/pdf" required>
-        <button type="submit">Upload PDF</button>
+    <h2>Configure Your Settings</h2>
+    <form id="mainForm" action="/quesbox/" method="GET">
+
+        <fieldset>
+            <legend>How do you want to input questions?</legend>
+            <label>
+                <input type="radio" name="input_method" value="manual" checked onchange="toggleInputMethod()"> Manual Entry
+            </label>
+            <label>
+                <input type="radio" name="input_method" value="pdf" onchange="toggleInputMethod()"> PDF Parsing
+            </label>
+        </fieldset>
+    
+        <div id="uploadSection" style="display: none;">
+            <label>Upload PDF:</label>
+            <input type="file" name="file" accept="application/pdf" id="pdfInput">
+        </div>
+    
+        <fieldset>
+            <legend>Select a Writing Style (work in progress):</legend>
+            <select name="writing-style">
+                <option value="formal">Formal</option>
+                <option value="shakespearan">Shakespearan</option>
+                <option value="thinking">Thinking</option>
+            </select>
+        </fieldset>
+    
+        <fieldset>
+            <legend>Choose a Model (work in progress):</legend>
+            <select name="model">
+                <option value="r1">R1</option>
+                <option value="llama-versatile">LLaMA Versatile</option>
+                <option value="llama3-7b">LLaMA 3-7B</option>
+            </select>
+        </fieldset>
+    
+        <button type="submit">Continue</button>
+    
     </form>
+    
 
     {% if error %}
         <p style="color: red;">{{ error }}</p>

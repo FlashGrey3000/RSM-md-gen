@@ -18,11 +18,11 @@ async def quesbox(request: Request):
     return templates.TemplateResponse("quesbox.html", {"request": request, "questions": questions})
 
 @app.post("/upload/")
-async def upload_pdf(request: Request, file: UploadFile = File(...)):
+async def upload_pdf(file: UploadFile = File(...)):
     global questions
 
     if not file.filename.lower().endswith(".pdf"):
-        return templates.TemplateResponse("index.html", {"request": request, "error": "Only PDF files are allowed!"})
+        return {"error": "Only PDF files are allowed!"}
 
     try:
         pdf_data = await file.read()
@@ -30,12 +30,12 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         questions = extract_questions_from_pdf(pdf_data)
 
         if not questions:
-            return templates.TemplateResponse("index.html", {"request": request, "error": "No questions found in the PDF."})
+            return {"error": "No questions found in the PDF."}
 
         return RedirectResponse(url="/quesbox/", status_code=303)
 
     except Exception as e:
-        return templates.TemplateResponse("index.html", {"request": request, "error": f"Failed to process PDF: {str(e)}"})
+        return {"error": f"Failed to process PDF: {str(e)}"}
 
 @app.post("/generate/")
 async def generate(request: Request):

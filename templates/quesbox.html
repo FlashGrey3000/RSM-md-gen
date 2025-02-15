@@ -25,6 +25,17 @@
         .merge-btn:hover { background-color: #0056b3; }
         .remove-btn { background-color: #dc3545; top: 40px; }
         .remove-btn:hover { background-color: #a71d2a; }
+        #add-question-btn {
+            display: block;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #add-question-btn:hover { background-color: #218838; }
     </style>
     <script>
         function mergeWithPrevious(button) {
@@ -60,10 +71,10 @@
         function copyToClipboard(button) {
             let codeElement = button.previousElementSibling;
             navigator.clipboard.writeText(codeElement.textContent).then(() => {
-                alert("Copied to clipboard!")
+                alert("Copied to clipboard!");
             });
         }
-    
+
         async function sendToGenerate(button) {
             let questionText = button.parentElement.querySelector(".question-text").innerText;
 
@@ -76,6 +87,34 @@
             const result = await response.json();
             alert(result.response || "Error generating response.");
         }
+
+        function addQuestion() {
+            let container = document.getElementById("questions-container");
+
+            let newQuestionDiv = document.createElement("div");
+            newQuestionDiv.classList.add("question-container");
+
+            let questionPara = document.createElement("p");
+            questionPara.classList.add("question-text");
+            questionPara.contentEditable = "true";
+            questionPara.innerText = "New Question (Click to Edit)";
+
+            let mergeButton = document.createElement("button");
+            mergeButton.classList.add("merge-btn");
+            mergeButton.innerText = "Merge with Previous";
+            mergeButton.onclick = function () { mergeWithPrevious(this); };
+
+            let removeButton = document.createElement("button");
+            removeButton.classList.add("remove-btn");
+            removeButton.innerText = "Remove";
+            removeButton.onclick = function () { removeBlock(this); };
+
+            newQuestionDiv.appendChild(questionPara);
+            newQuestionDiv.appendChild(mergeButton);
+            newQuestionDiv.appendChild(removeButton);
+
+            container.appendChild(newQuestionDiv);
+        }
     </script>
 </head>
 <body>
@@ -85,12 +124,14 @@
     <div id="questions-container">
         {% for question in questions %}
         <div class="question-container">
-            <p class="question-text">{{ question }}</p>
+            <p class="question-text" contenteditable="true">{{ question }}</p>
             <button class="merge-btn" onclick="mergeWithPrevious(this)">Merge with Previous</button>
             <button class="remove-btn" onclick="removeBlock(this)">Remove</button>
         </div>
         {% endfor %}
     </div>
+
+    <button id="add-question-btn" onclick="addQuestion()">Add Question</button>
 
     <button onclick="fetchData()">Generate Markdown</button>
 
