@@ -55,23 +55,30 @@
 
         async function fetchData() {
             const questionElements = document.querySelectorAll(".question-text");
+            const questions = Array.from(questionElements).map(q => q.innerText);
 
-            const questionList = Array.from(questionElements).map(q => q.innerText);
-
-            const response = await fetch("/generate/", {  
-                method: "POST",  
-                headers: { "Content-Type": "application/json" },  
-                body: JSON.stringify({ questions: questionList })
+            const response = await fetch("/generate/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ questions }),
             });
 
             const data = await response.json();
-            document.getElementById("output").innerText = data.response || "Error generating response.";
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            localStorage.setItem("generatedMarkdown", JSON.stringify(data.response));
+
+            window.location.href = "/preview";
         }
 
         function copyToClipboard(button) {
-            let codeElement = button.previousElementSibling;
-            navigator.clipboard.writeText(codeElement.textContent).then(() => {
-                alert("Copied to clipboard!");
+            const output = document.getElementById("output");
+            navigator.clipboard.writeText(output.innerText).then(() => {
+                button.innerText = "Copied!";
+                setTimeout(() => (button.innerText = "Copy Code"), 1500);
             });
         }
 

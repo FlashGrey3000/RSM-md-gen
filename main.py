@@ -47,3 +47,7 @@ async def generate(request: Request):
     responses = [f"Generated response for: {generate_message(q)}" for q in questions]
 
     return {"response": responses}
+
+@app.get("/preview")
+async def preview_page(request: Request):
+    return templates.TemplateResponse("preview.html", {"request": request})
