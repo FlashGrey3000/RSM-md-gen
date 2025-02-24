@@ -2,42 +2,138 @@
 <html>
 <head>
     <title>{{ title }}</title>
-    <script>
-        function toggleInputMethod() {
-            const inputMethod = document.querySelector('input[name="input_method"]:checked').value;
-            const form = document.getElementById("mainForm");
-            const uploadSection = document.getElementById("uploadSection");
-            const pdfInput = document.getElementById("pdfInput");
-    
-            if (inputMethod === "manual") {
-                form.action = "/quesbox/";
-                form.method = "GET";
-                form.removeAttribute("enctype");
-                uploadSection.style.display = "none";
-                pdfInput.removeAttribute("required");
-            } else {
-                form.action = "/upload/";
-                form.method = "POST";
-                form.setAttribute("enctype", "multipart/form-data");
-                uploadSection.style.display = "block";
-                pdfInput.setAttribute("required", "true");
-            }
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: #a8a8a8;
         }
-    </script>
+        h1, h2 {
+            text-align: center;
+            background-color: #fff;
+            padding: 0 10%;
+        }
+        #preview h1, #preview h2 {
+            text-align: initial;
+            background-color: initial;
+            padding: initial;
+        }
+        .question-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .merge-btn, .remove-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            color: white;
+        }
+        .merge-btn { background-color: #007bff; }
+        .merge-btn:hover { background-color: #0056b3; }
+        .remove-btn { background-color: #dc3545; top: 40px; }
+        .remove-btn:hover { background-color: #a71d2a; }
+        #add-question-btn {
+            display: block;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #add-question-btn:hover { background-color: #218838; }
+
+        #preview {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+
+        #mainForm {
+            display: flex;
+            flex-direction: column;
+            align-self: center;
+            align-items: center;
+        }
+
+        #mainForm fieldset {
+            width: 50%;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #mainForm button {
+            padding: 5px 10px;
+            margin-top: 10px;
+            background-color: chartreuse;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 2px 2px 2px #000;
+            cursor: pointer;
+        }
+
+        #genMDButton {
+            padding: 5px 10px;
+            margin-top: 10px;
+            background-color: chartreuse;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 2px 2px 2px #000;
+            cursor: pointer;
+        }
+
+        [contenteditable="true"]:empty:before {
+            content: attr(data-placeholder);
+            color: #000000;
+            opacity: 0.75;
+        }
+
+        #preview {
+            margin: 0 10px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 5px #000;
+        }
+
+        #copyMdBtn {
+            display: block;
+            padding: 5px 10px;
+            margin: 15px auto;
+            background-color: chartreuse;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 2px 2px 2px #000;
+            cursor: pointer;
+        }
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 </head>
 <body>
     <h1>RSM-style Markdown Generator</h1>
 
-    <h2>Configure Your Settings</h2>
-    <form id="mainForm" action="/quesbox/" method="GET">
+    <form id="mainForm">
+        <h2>Configure Your Settings</h2>
 
+        <!-- Removed Toggle Input Method as the pdf Parser is utter waste as of now. Will bring it back when pdf parser logic would be fixed -->
         <fieldset>
-            <legend>How do you want to input questions?</legend>
+            <legend>How do you want to input questions? (also wip :'))</legend>
             <label>
                 <input type="radio" name="input_method" value="manual" checked onchange="toggleInputMethod()"> Manual Entry
             </label>
             <label>
-                <input type="radio" name="input_method" value="pdf" onchange="toggleInputMethod()"> PDF Parsing
+                <input type="radio" name="input_method" value="pdf" onchange="toggleInputMethod()"> PDF Parsing 
             </label>
         </fieldset>
     
@@ -48,7 +144,7 @@
     
         <fieldset>
             <legend>Select a Writing Style (work in progress):</legend>
-            <select name="writing-style">
+            <select name="writing_style">
                 <option value="formal">Formal</option>
                 <option value="shakespearan">Shakespearan</option>
                 <option value="thinking">Thinking</option>
@@ -69,8 +165,108 @@
     </form>
     
 
+    <div id="quesbox" style="display: none;">
+        <h2>Question Merger</h2>
+        <div id="questions-container"></div>
+        <button id="add-question-btn">Add Question</button>
+        <button id="genMDButton" onclick="fetchData()">Generate Markdown</button>
+    </div>
+
+    <div id="live-preview" class="live-preview" style="display: none;">
+        <h1>Live Markdown Preview</h1>
+        <div id="preview"></div>
+        <button id="copyMdBtn" onclick="copyMarkdown()">Copy markdown</button>
+    </div>
+
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
+
+    <script>
+        document.getElementById("mainForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const inputMethod = formData.get("input_method");
+            const writingStyle = formData.get("writing_style");
+
+            // Store data in sessionStorage
+            sessionStorage.setItem("input_method", inputMethod);
+            sessionStorage.setItem("writing_style", writingStyle);
+
+            document.getElementById("mainForm").style.display = "none";
+            document.getElementById("quesbox").style.display = "block";
+        });
+
+        document.getElementById("add-question-btn").addEventListener("click", function() {
+            let container = document.getElementById("questions-container");
+            let newQuestionDiv = document.createElement("div");
+            newQuestionDiv.classList.add("question-container");
+            newQuestionDiv.innerHTML = `
+                <p class="question-text" contenteditable="true" data-placeholder="New Question (Paste/Type question here)"></p>
+                <button class="merge-btn" onclick="mergeWithPrevious(this)">Merge with Previous</button>
+                <button class="remove-btn" onclick="removeBlock(this)">Remove</button>
+            `;
+            container.appendChild(newQuestionDiv);
+        });
+
+        function mergeWithPrevious(button) {
+            let currentBlock = button.parentElement;
+            let previousBlock = currentBlock.previousElementSibling;
+
+            if (previousBlock && previousBlock.classList.contains("question-container")) {
+                previousBlock.querySelector(".question-text").innerHTML += "<br><br>" + currentBlock.querySelector(".question-text").innerHTML;
+                currentBlock.remove();
+            }
+        }
+
+        function removeBlock(button) {
+            let block = button.parentElement;
+            block.remove();
+        }
+
+        function fetchData() {
+            const questionElements = document.querySelectorAll(".question-text");
+            const questions = Array.from(questionElements).map(q => q.innerText);
+
+            fetch("/generate/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ questions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                sessionStorage.setItem("generatedMarkdown", JSON.stringify(data.response));
+                renderMarkdown();
+            });
+        }
+
+        function renderMarkdown() {
+            const storedData = sessionStorage.getItem("generatedMarkdown");
+            if (!storedData) return {"error": "No storedData... This could mean that the there was no markdown generated for this session."};
+            
+            document.getElementById("quesbox").style.display = "none";
+            document.getElementById("live-preview").style.display = "block";
+
+            const markdownText = JSON.parse(storedData).join("\n\n");
+            const converter = new showdown.Converter();
+            document.getElementById("preview").innerHTML = converter.makeHtml(markdownText);
+        }
+
+        function copyMarkdown() {
+            const md_data = sessionStorage.getItem("generatedMarkdown");
+
+            if (!md_data) {
+                alert("No Markdown data found!");
+                return;
+            }
+
+            const markdownText = JSON.parse(md_data).join("\n\n");
+
+            navigator.clipboard.writeText(markdownText)
+                .then(() => alert("Copied markdown..."))
+                .catch(err => console.error("Failed to copy:", err));
+        }
+    </script>
 </body>
 </html>

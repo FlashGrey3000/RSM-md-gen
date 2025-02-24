@@ -7,19 +7,13 @@ from llm_api import generate_message
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-questions = []  # storing questions globally
-
 @app.get("/")
 async def homepage(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "title": "RSM-style Markdown Generator"})
 
-@app.get("/quesbox")
-async def quesbox(request: Request):
-    return templates.TemplateResponse("quesbox.html", {"request": request, "questions": questions})
 
 @app.post("/upload/")
 async def upload_pdf(file: UploadFile = File(...)):
-    global questions
 
     if not file.filename.lower().endswith(".pdf"):
         return {"error": "Only PDF files are allowed!"}
@@ -44,10 +38,7 @@ async def generate(request: Request):
     if not questions:
         return {"error": "No questions provided."}
 
-    responses = [f"Generated response for: {generate_message(q)}" for q in questions]
+    # responses = ["# sample response 1", "`test response` \n- 2"]
+    responses = [f"{generate_message(q)}" for q in questions]
 
     return {"response": responses}
-
-@app.get("/preview")
-async def preview_page(request: Request):
-    return templates.TemplateResponse("preview.html", {"request": request})
